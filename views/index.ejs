@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css">
+    <title>YouTube2MP3 Pro - Free YouTube to MP3 Converter</title>
+</head>
+<body>
+    <div class="container">
+        <h1> <i class="fa-brands fa-youtube"></i>   YouTube2MP3 Pro</h1>
+        <form action="/convert-mp3" method="POST" id="form">
+            <div class="inside-top-container">
+            <p>Please insert a valid YouTube video URL</p>
+            <input type="text" name="videoLink" id="link" placeholder="Enter YouTube video link" >
+            <button id="convert-btn" type="submit"><i class="fa-solid fa-download"></i></i></button>
+            </div>
+            <div class="download-info <%= (typeof success != "undefined") ? "active" : "" %>">
+    <% if(typeof success != "undefined" && success) { %>
+        <div class="success">
+            <h2>Conversion Successful!</h2>
+            <p>Your file is ready to download...</p>
+            <div class="song-info">
+                <p><b><%= song_title %></b></p>
+                <p id="size"><%= song_size%></p>
+                <a href="<%= song_link %>" download>
+                    <button id="download-btn" type="button">
+                        <i class="fa-regular fa-circle-down"></i> DOWNLOAD
+                    </button>
+                </a>
+            </div>
+        </div>
+    <% } else if(typeof success != "undefined" && !success) { %> 
+        <div class="error">
+            <p><%= message %></p>
+        </div>
+    <% } %>
+    </div>
+</div>
+</form>
+</div>
+<div class="container-2">
+        <h1>YouTube2MP3 Pro</h1>
+    <p>
+      Welcome to <strong>YouTube2MP3 Pro</strong>, the easiest way to save your favorite YouTube content as MP3 or MP4 files.  
+      Our tool is completely free, works online, and is optimized for both desktop and mobile users—no software installation required.
+    </p>
+
+    <h2>How it Works</h2>
+      <p> 1. Find a video you want to convert on <a href="https://www.youtube.com" target="_blank">YouTube</a>. </p>
+      <br>
+      <p> 2. Copy the video link directly from your browser’s address bar or the YouTube app. </p>
+      <br>
+      <p> 3.Paste the link into the converter box and select whether you want MP3 (audio) or MP4 (video). </p>
+      <br>
+      <p> 4. Click the <strong>Convert</strong> button and wait a few seconds for processing. </p>
+      <br>
+      <p> 5. Download your converted file instantly and enjoy it offline—anytime, anywhere. </p>
+
+    <h2>Why Choose YouTube2MP3 Pro?</h2>
+    <p> 1. ✔ 100% Free and fast conversions. <br></p>
+    <p> 2. ✔ Works on all devices and browsers. <br></p>
+    <p> 3. ✔ No registration or software required. <br></p>
+    <p> 4. ✔ High-quality audio and video downloads. <br></p>
+
+    <p class="terms">
+      By using <strong>YouTube2MP3 Pro</strong>, you agree to follow our Terms of Service.  
+      Thank you for trusting us as your go-to YouTube to MP3 converter.
+    </p>
+</div>
+</body>
+</html>
