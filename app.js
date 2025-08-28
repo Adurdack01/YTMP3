@@ -28,6 +28,12 @@ app.get("/", (req, res) => {
     });
 });
 
+// Static pages
+app.get('/contact', (req, res)=>{ res.render('contact'); });
+app.get('/copyright-claims', (req, res)=>{ res.render('copyright'); });
+app.get('/privacy', (req, res)=>{ res.render('privacy'); });
+app.get('/terms', (req, res)=>{ res.render('terms'); });
+
 app.post("/convert-mp3", async (req, res) => {
     const wantsJson = (req.headers.accept || '').includes('application/json');
     const videoUrl = req.body.videoLink;
