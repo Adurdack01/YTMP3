@@ -1,73 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css">
-    <title>YouTube2MP3 Pro - Free YouTube to MP3 Converter</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" />
+  <title>YT2MP3 • YouTube to MP3 Converter</title>
 </head>
 <body>
-    <div class="container">
-        <h1> <i class="fa-brands fa-youtube"></i>   YouTube2MP3 Pro</h1>
-        <form action="/convert-mp3" method="POST" id="form">
-            <div class="inside-top-container">
-            <p>Please insert a valid YouTube video URL</p>
-            <input type="text" name="videoLink" id="link" placeholder="Enter YouTube video link" >
-            <button id="convert-btn" type="submit"><i class="fa-solid fa-download"></i></i></button>
-            </div>
-            <div class="download-info <%= (typeof success != "undefined") ? "active" : "" %>">
-    <% if(typeof success != "undefined" && success) { %>
-        <div class="success">
-            <h2>Conversion Successful!</h2>
-            <p>Your file is ready to download...</p>
-            <div class="song-info">
-                <p><b><%= song_title %></b></p>
-                <p id="size"><%= song_size%></p>
-                <a href="<%= song_link %>" download>
-                    <button id="download-btn" type="button">
-                        <i class="fa-regular fa-circle-down"></i> DOWNLOAD
-                    </button>
-                </a>
-            </div>
-        </div>
-    <% } else if(typeof success != "undefined" && !success) { %> 
-        <div class="error">
-            <p><%= message %></p>
-        </div>
-    <% } %>
+  <div class="bg-blobs" aria-hidden="true">
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="blob blob-3"></span>
+  </div>
+
+  <header class="site-header elev-2" role="banner">
+    <div class="header-inner">
+      <a class="brand" href="#top" aria-label="YT2MP3 home">
+        <i class="fa-solid fa-music brand-icon" aria-hidden="true"></i>
+        <span class="brand-name">YT2MP3</span>
+      </a>
+      <nav class="primary-nav" aria-label="Primary">
+        <ul class="nav-list">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#how">How</a></li>
+        </ul>
+      </nav>
+      <div class="header-actions">
+        <button id="theme-toggle" class="icon-btn" aria-label="Toggle color theme" aria-pressed="false">
+          <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>
+        </button>
+        <a class="cta" href="#converter">Get Started</a>
+      </div>
     </div>
-</div>
-</form>
-</div>
-<div class="container-2">
-        <h1>YouTube2MP3 Pro</h1>
-    <p>
-      Welcome to <strong>YouTube2MP3 Pro</strong>, the easiest way to save your favorite YouTube content as MP3 or MP4 files.  
-      Our tool is completely free, works online, and is optimized for both desktop and mobile users—no software installation required.
-    </p>
+  </header>
 
-    <h2>How it Works</h2>
-      <p> 1. Find a video you want to convert on <a href="https://www.youtube.com" target="_blank">YouTube</a>. </p>
-      <br>
-      <p> 2. Copy the video link directly from your browser’s address bar or the YouTube app. </p>
-      <br>
-      <p> 3.Paste the link into the converter box and select whether you want MP3 (audio) or MP4 (video). </p>
-      <br>
-      <p> 4. Click the <strong>Convert</strong> button and wait a few seconds for processing. </p>
-      <br>
-      <p> 5. Download your converted file instantly and enjoy it offline—anytime, anywhere. </p>
+  <main id="top" class="content">
+    <section class="hero" aria-labelledby="hero-title">
+      <h1 id="hero-title" class="hero-title">YouTube to MP3 Converter</h1>
+      <p class="hero-subtitle">Fast, clean, and private conversions with a modern, accessible experience.</p>
+    </section>
 
-    <h2>Why Choose YouTube2MP3 Pro?</h2>
-    <p> 1. ✔ 100% Free and fast conversions. <br></p>
-    <p> 2. ✔ Works on all devices and browsers. <br></p>
-    <p> 3. ✔ No registration or software required. <br></p>
-    <p> 4. ✔ High-quality audio and video downloads. <br></p>
+    <section id="converter" class="section">
+      <div class="card convert-card rounded-xl elev-3">
+        <form action="/convert-mp3" method="POST" id="form" class="convert-form" novalidate>
+          <label class="input-label" for="link">Paste a YouTube link</label>
+          <div class="input-row">
+            <div class="input-icon" aria-hidden="true"><i class="fa-solid fa-link"></i></div>
+            <input type="text" name="videoLink" id="link" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" inputmode="url" />
+            <button id="convert-btn" type="submit" class="btn-primary">
+              <i class="fa-solid fa-download" aria-hidden="true"></i>
+              <span>Convert</span>
+            </button>
+          </div>
 
-    <p class="terms">
-      By using <strong>YouTube2MP3 Pro</strong>, you agree to follow our Terms of Service.  
-      Thank you for trusting us as your go-to YouTube to MP3 converter.
-    </p>
-</div>
+          <div id="progress-wrap" class="progress-wrap" hidden>
+            <div id="progress" class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+          </div>
+
+          <div id="preview-wrap" class="preview" hidden>
+            <img id="preview-thumb" class="preview-thumb" src="" alt="" />
+            <div class="preview-meta">
+              <p id="preview-title" class="preview-title"></p>
+            </div>
+          </div>
+
+          <div id="result-alert" class="alert" role="alert" hidden></div>
+
+          <div id="result-wrap" class="result" hidden>
+            <div class="result-meta">
+              <h3 id="result-title" class="result-title"></h3>
+              <p class="result-size">Size: <span id="result-size"></span></p>
+            </div>
+            <a id="result-download" class="btn-success" href="#" download>
+              <i class="fa-regular fa-circle-down" aria-hidden="true"></i>
+              <span>Download MP3</span>
+            </a>
+          </div>
+        </form>
+
+        <div class="download-info <%= (typeof success != "undefined") ? "active" : "" %>">
+          <% if(typeof success != "undefined" && success) { %>
+            <div class="server-result">
+              <h2 class="sr-only">Server Result</h2>
+              <div class="result-meta">
+                <h3 class="result-title"><%= song_title %></h3>
+                <p class="result-size">Size: <%= song_size %></p>
+              </div>
+              <a class="btn-success" href="<%= song_link %>" download>
+                <i class="fa-regular fa-circle-down" aria-hidden="true"></i>
+                <span>Download MP3</span>
+              </a>
+            </div>
+          <% } else if(typeof success != "undefined" && !success) { %>
+            <div class="alert" role="alert"><%= message %></div>
+          <% } %>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="section">
+      <div class="features-grid">
+        <article class="feature-card rounded-xl elev-1">
+          <i class="fa-solid fa-bolt feature-icon" aria-hidden="true"></i>
+          <h3 class="feature-title">Fast</h3>
+          <p>Optimized conversions and a smooth, responsive interface.</p>
+        </article>
+        <article class="feature-card rounded-xl elev-1">
+          <i class="fa-solid fa-brush feature-icon" aria-hidden="true"></i>
+          <h3 class="feature-title">Clean</h3>
+          <p>Material-inspired design with clear hierarchy and focus.</p>
+        </article>
+        <article class="feature-card rounded-xl elev-1">
+          <i class="fa-solid fa-user-shield feature-icon" aria-hidden="true"></i>
+          <h3 class="feature-title">Private</h3>
+          <p>No registration. Works on all devices and browsers.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="how" class="section">
+      <div class="card info-card rounded-xl elev-2">
+        <h2>How it works</h2>
+        <ol class="steps">
+          <li>Find a video on <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer">YouTube</a>.</li>
+          <li>Copy the video link from your browser or the YouTube app.</li>
+          <li>Paste the link above and press Convert.</li>
+          <li>Wait a few seconds for processing.</li>
+          <li>Download your MP3 and enjoy offline.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer elev-1" role="contentinfo">
+    <p>© <span id="year"><script>document.currentScript.previousElementSibling.textContent = new Date().getFullYear()</script></span> • Material-inspired</p>
+  </footer>
+
+  <script src="/js/app.js" defer></script>
 </body>
 </html>
