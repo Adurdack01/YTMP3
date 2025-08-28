@@ -36,11 +36,11 @@ body{font-family:system-ui,-apple-system,Sego UI,Roboto,Helvetica,Arial,sans-ser
 .blob-3{width:280px;height:280px;background:radial-gradient(closest-side,hsl(243 80% 64%),transparent);top:40%;left:60%}
 
 /* Header */
-.site-header{position:sticky;top:0;background:color-mix(in hsl,var(--surface) 85%,white 15%);backdrop-filter:saturate(1.2) blur(8px);z-index:10}
-.header-inner{max-width:1120px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.site-header{position:sticky;top:0;background:color-mix(in hsl,var(--surface) 85%,white 15%);backdrop-filter:saturate(1.2) blur(8px);z-index:10;border-bottom:1px solid var(--outline)}
+.header-inner{max-width:1120px;margin:0 auto;padding:16px 20px;min-height:80px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:inline-flex;align-items:center;gap:10px;color:var(--on-surface);text-decoration:none;font-weight:700}
 .brand-icon{color:var(--primary)}
-.brand-name{letter-spacing:.3px}
+.brand-name{letter-spacing:.3px;font-size:1.1rem}
 .primary-nav .nav-list{display:flex;gap:16px;list-style:none}
 .primary-nav a{color:var(--on-surface);text-decoration:none;padding:8px 10px;border-radius:10px}
 .primary-nav a:focus-visible,.primary-nav a:hover{outline:2px solid color-mix(in hsl,var(--primary),white 30%);outline-offset:2px}
@@ -58,6 +58,7 @@ body{font-family:system-ui,-apple-system,Sego UI,Roboto,Helvetica,Arial,sans-ser
 .hero-subtitle{margin-top:10px;color:color-mix(in hsl,var(--on-surface),white 35%)}
 
 /* Converter */
+#preview-wrap[hidden],#result-wrap[hidden]{display:none !important}
 .card{background:var(--surface-variant);border:1px solid var(--outline)}
 .convert-card{padding:18px}
 .input-label{display:block;font-weight:600;margin:4px 2px 10px}
