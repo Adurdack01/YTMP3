@@ -28,21 +28,29 @@ app.get("/", (req, res) => {
     });
 });
 
+// Static pages
+app.get('/contact', (req, res)=>{ res.render('contact'); });
+app.get('/copyright-claims', (req, res)=>{ res.render('copyright'); });
+app.get('/privacy', (req, res)=>{ res.render('privacy'); });
+app.get('/terms', (req, res)=>{ res.render('terms'); });
+
 app.post("/convert-mp3", async (req, res) => {
+    const wantsJson = (req.headers.accept || '').includes('application/json');
     const videoUrl = req.body.videoLink;
     const videoId = extractVideoId(videoUrl);
 
-         if (!videoId) {
-        return res.render("index", {
+    if (!videoId) {
+        const payload = {
             success: false,
             song_title: null,
             song_size: null,
             song_link: null,
             message: "❌ Please enter a valid YouTube link."
-        });
-         }
+        };
+        return wantsJson ? res.json(payload) : res.render("index", payload);
+    }
 
-          try {
+    try {
         const fetchAPI = await fetch(
             `https://${process.env.API_HOST}/dl?id=${videoId}`,
             {
@@ -58,31 +66,34 @@ app.post("/convert-mp3", async (req, res) => {
         console.log("API Response:", fetchResponse);
 
         if (fetchResponse.status === "ok") {
-            return res.render("index", {
+            const payload = {
                 success: true,
                 song_title: fetchResponse.title,
                 song_size: formatFileSize(fetchResponse.filesize),
                 song_link: fetchResponse.link,
                 message: null
-            });
+            };
+            return wantsJson ? res.json(payload) : res.render("index", payload);
         } else {
-            return res.render("index", {
+            const payload = {
                 success: false,
                 song_title: null,
                 song_size: null,
                 song_link: null,
                 message: fetchResponse.msg || "❌ Conversion failed."
-            });
+            };
+            return wantsJson ? res.json(payload) : res.render("index", payload);
         }
     } catch (error) {
         console.error(error);
-        return res.render("index", {
+        const payload = {
             success: false,
             song_title: null,
             song_size: null,
             song_link: null,
             message: "❌ Server error. Please try again later."
-        });
+        };
+        return wantsJson ? res.json(payload) : res.render("index", payload);
     }
 });
 
