@@ -99,6 +99,9 @@ body{font-family:system-ui,-apple-system,Sego UI,Roboto,Helvetica,Arial,sans-ser
 
 /* Footer */
 .site-footer{margin-top:28px;padding:16px;text-align:center;background:var(--surface-variant);border-top:1px solid var(--outline)}
+.footer-links{display:flex;gap:10px;justify-content:center;align-items:center;margin-bottom:6px}
+.footer-links a{color:var(--on-surface);text-decoration:none}
+.footer-links a:hover,.footer-links a:focus-visible{text-decoration:underline;outline:none}
 
 /* Accessibility helpers */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
