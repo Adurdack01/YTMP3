@@ -7,7 +7,7 @@
     "start": "node app.js",
     "dev" : "nodemon app.js"
   },
-  "author": "",
+  "author": "Dave Chavez",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^17.2.1",
