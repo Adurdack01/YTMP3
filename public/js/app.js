@@ -61,10 +61,8 @@
   }
 
   if(urlInput){
-    urlInput.addEventListener('input', (e)=>{
-      const v = e.target.value.trim();
-      fetchOEmbed(v);
-    });
+    // Hide preview until conversion
+    if(previewWrap){ previewWrap.hidden = true; }
   }
 
   if(form){
@@ -76,7 +74,11 @@
         resultAlert.hidden = false;
         return;
       }
+      // Reset state before starting
       resultAlert.hidden = true;
+      if(previewWrap){ previewWrap.hidden = true; }
+      if(resultWrap){ resultWrap.hidden = true; }
+
       animateProgress(4500);
       convertBtn.disabled = true;
       try{
@@ -89,11 +91,15 @@
         completeProgress();
         convertBtn.disabled = false;
         if(data && data.success){
+          // Update result first
           resultTitle.textContent = data.song_title || '';
           resultSize.textContent = data.song_size || '';
           resultDownload.href = data.song_link || '#';
           resultWrap.hidden = false;
           resultAlert.hidden = true;
+          // Fetch oEmbed to show thumbnail after success
+          try{ await fetchOEmbed(videoLink); }catch(_){ /* ignore */ }
+          if(previewWrap){ previewWrap.hidden = false; }
           resultDownload.focus();
         } else {
           resultWrap.hidden = true;
