@@ -110,11 +110,17 @@ body{font-family:system-ui,-apple-system,Sego UI,Roboto,Helvetica,Arial,sans-ser
 @media screen and (max-width: 480px){
   .header-inner{padding:10px 12px}
   .primary-nav{display:none}
-  .features-grid{grid-template-columns:1fr}
+  .features-grid{grid-template-columns:1fr;grid-template-areas:"fast" "private" "clean"}
+  .feature-fast{grid-area:fast}
+  .feature-private{grid-area:private}
+  .feature-clean{grid-area:clean}
   .convert-card{padding:14px}
 }
 
 @media screen and (max-width: 768px){
   .section{margin:24px auto}
-  .features-grid{grid-template-columns:repeat(2,1fr)}
+  .features-grid{grid-template-columns:repeat(2,1fr);grid-template-areas:"fast clean" "private private"}
+  .feature-fast{grid-area:fast}
+  .feature-clean{grid-area:clean}
+  .feature-private{grid-area:private;justify-self:center;max-width:520px;width:100%}
 }
