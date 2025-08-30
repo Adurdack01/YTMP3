@@ -7,7 +7,16 @@
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" />
   <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico">
-  <title>YT2MP3 • YouTube to MP3 Converter</title>
+  <title><%= seo.title %></title>
+ <meta name="description" content="<%= seo.description %>">
+ <link rel="canonical" href="https://yt2mp3s-converter.acdigi.icu/">
+<meta property="og:title" content="<%= seo.title %>">
+<meta property="og:description" content="<%= seo.description %>">
+<meta property="og:url" content="https://yt2mp3s-converter.acdigi.icu/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<%= seo.title %>">
+<meta name="twitter:description" content="<%= seo.description %>">
 </head>
 <body>
   <div class="bg-blobs" aria-hidden="true"> 
@@ -146,7 +155,7 @@
       <span aria-hidden="true">•</span>
       <a href="/terms">Terms of Use</a>
     </nav>
-    <p>© <span id="year"></span> • Chavez Digital</p>
+    <p>© <span id="year"></span> • AC-DIGITAL</p>
   </footer>
 
   <script src="/js/app.js" defer></script>
