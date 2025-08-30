@@ -1,4 +1,3 @@
 User-agent: *
 Allow: /
-
 Sitemap: https://yt2mp3s-converter.acdigi.icu/sitemap.xml
