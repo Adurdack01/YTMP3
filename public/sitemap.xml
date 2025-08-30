@@ -29,16 +29,16 @@
   <url>
     <loc>https://yt2mp3s-converter.acdigi.icu/privacy</loc>
     <lastmod>2025-08-30</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
 
   <!-- Terms & Conditions -->
   <url>
     <loc>https://yt2mp3s-converter.acdigi.icu/terms</loc>
     <lastmod>2025-08-30</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 
 </urlset>

@@ -5,9 +5,9 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- Force HTTPS and primary domain, but skip sitemap routes ---
+// --- Force HTTPS and primary domain, skip sitemap routes ---
 app.use((req, res, next) => {
-  if (req.path === "/sitemap.xml" || req.path === "/new-sitemap.xml") return next();
+  if (req.path === "/sitemap.xml" || req.path === "/sitemap-pages.xml") return next();
   const host = req.headers.host;
   if (req.headers["x-forwarded-proto"] !== "https") {
     return res.redirect("https://" + host + req.url);
@@ -20,19 +20,19 @@ app.use((req, res, next) => {
 
 // --- Template engine and static files ---
 app.set("view engine", "ejs");
-app.use(express.static("public"));
+app.use(express.static("public")); // <-- serves sitemap.xml & sitemap-pages.xml and all other static files
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // --- Serve sitemaps as static files ---
 app.get("/sitemap.xml", (req, res) => {
   res.type("application/xml");
-  res.sendFile(path.join(__dirname, "sitemap.xml"));
+  res.sendFile(path.join(__dirname, "public", "sitemap.xml"));
 });
-  
-app.get("/new-sitemap.xml", (req, res) => {
+
+app.get("/sitemap-pages.xml", (req, res) => {
   res.type("application/xml");
-  res.sendFile(path.join(__dirname, "new-sitemap.xml"));
+  res.sendFile(path.join(__dirname, "public", "sitemap-pages.xml"));
 });
 
 // --- Serve robots.txt ---
