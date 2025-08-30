@@ -11,17 +11,14 @@ const PORT = process.env.PORT || 3000;
 app.use((req, res, next) => {
   const host = req.headers.host;
 
-  // Skip HTTPS redirect on localhost or 127.0.0.1
   if (host.includes("localhost") || host.includes("127.0.0.1")) {
     return next();
   }
 
-  // Redirect to HTTPS if not already
   if (req.headers["x-forwarded-proto"] !== "https") {
     return res.redirect("https://" + host + req.url);
   }
 
-  // Redirect primary domain to subdomain
   if (host === "acdigi.icu") {
     return res.redirect(301, "https://yt2mp3s-converter.acdigi.icu" + req.url);
   }
@@ -113,20 +110,52 @@ app.get("/terms", (req, res) => res.render("terms", {
 // --- Convert MP3 route ---
 app.post("/convert-mp3", async (req, res) => {
   const videoUrl = req.body.videoLink;
-  if (!isValidYouTubeUrl(videoUrl)) return sendResponse(res, false, null, null, null, "❌ Please enter a valid YouTube link.");
+
+  if (!isValidYouTubeUrl(videoUrl)) {
+    return sendResponse(res, false, null, null, null, "❌ Please enter a valid YouTube link.");
+  }
+
   const videoId = extractVideoId(videoUrl);
-  if (!videoId) return sendResponse(res, false, null, null, null, "❌ Could not extract video ID.");
+  if (!videoId) {
+    return sendResponse(res, false, null, null, null, "❌ Could not extract video ID.");
+  }
 
   try {
-    const fetchAPI = await fetch(`https://${process.env.API_HOST}/dl?id=${videoId}&license=creativeCommon`, {
+    // ✅ Added format and type params to improve API success
+    const apiUrl = `https://${process.env.API_HOST}/dl?id=${videoId}&format=mp3&type=audio`;
+    console.log("Fetching API:", apiUrl);
+
+    const fetchAPI = await fetch(apiUrl, {
       method: "GET",
-      headers: { "x-rapidapi-key": process.env.API_KEY, "x-rapidapi-host": process.env.API_HOST }
+      headers: {
+        "x-rapidapi-key": process.env.API_KEY,
+        "x-rapidapi-host": process.env.API_HOST
+      }
     });
+
     const data = await fetchAPI.json();
-    if (data.status === "ok") return sendResponse(res, true, data.title, formatFileSize(data.filesize), data.link);
-    else return sendResponse(res, false, null, null, null, data.msg || "❌ Conversion failed or not Creative Commons.");
+    console.log("API response:", data); // 🔎 Debug log
+
+    if (data.status === "ok" && data.link) {
+      return sendResponse(
+        res,
+        true,
+        data.title,
+        formatFileSize(data.filesize),
+        data.link
+      );
+    } else {
+      return sendResponse(
+        res,
+        false,
+        null,
+        null,
+        null,
+        data.msg || "❌ Conversion failed. Please try again."
+      );
+    }
   } catch (err) {
-    console.error(err);
+    console.error("API error:", err);
     return sendResponse(res, false, null, null, null, "❌ Server error. Please try again later.");
   }
 });
@@ -135,8 +164,15 @@ app.post("/convert-mp3", async (req, res) => {
 function sendResponse(res, success, title, size, link, message = null) {
   res.json({ success, song_title: title, song_size: size, song_link: link, message });
 }
-function isValidYouTubeUrl(url) { return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(url); }
-function extractVideoId(url) { const match = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11}).*/); return match ? match[1] : null; }
-function formatFileSize(bytes) { return bytes ? (bytes / (1024*1024)).toFixed(2) + " MB" : null; }
+function isValidYouTubeUrl(url) {
+  return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(url);
+}
+function extractVideoId(url) {
+  const match = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11}).*/);
+  return match ? match[1] : null;
+}
+function formatFileSize(bytes) {
+  return bytes ? (bytes / (1024*1024)).toFixed(2) + " MB" : null;
+}
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

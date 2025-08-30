@@ -13,6 +13,7 @@
   const resultDownload = document.getElementById('result-download');
   const resultAlert = document.getElementById('result-alert');
   const themeToggle = document.getElementById('theme-toggle');
+  const alertMessage = document.getElementById('alert-message'); // ✅ support for alert span
 
   function isYouTubeUrl(url){
     const re = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/i;
@@ -61,7 +62,6 @@
   }
 
   if(urlInput){
-    // Hide preview until conversion
     if(previewWrap){ previewWrap.hidden = true; }
   }
 
@@ -70,47 +70,69 @@
       e.preventDefault();
       const videoLink = urlInput.value.trim();
       if(!isYouTubeUrl(videoLink)){
-        resultAlert.textContent = 'Please enter a valid YouTube link.';
+        if(alertMessage) alertMessage.textContent = '❌ Please enter a valid YouTube link.';
         resultAlert.hidden = false;
         return;
       }
+
       // Reset state before starting
+      if(alertMessage) alertMessage.textContent = '';
       resultAlert.hidden = true;
       if(previewWrap){ previewWrap.hidden = true; }
       if(resultWrap){ resultWrap.hidden = true; }
 
       animateProgress(4500);
       convertBtn.disabled = true;
+
       try{
         const res = await fetch('/convert-mp3', {
           method: 'POST',
-          headers: { 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8', 'Accept':'application/json' },
+          headers: { 
+            'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8', 
+            'Accept':'application/json' 
+          },
           body: new URLSearchParams({ videoLink }).toString()
         });
+
         const data = await res.json();
         completeProgress();
         convertBtn.disabled = false;
-        if(data && data.success){
-          // Update result first
+
+        if(data && data.success && data.song_link){
           resultTitle.textContent = data.song_title || '';
           resultSize.textContent = data.song_size || '';
-          resultDownload.href = data.song_link || '#';
+
+          // ✅ Show valid link only
+          resultDownload.href = data.song_link;
+          resultDownload.hidden = false;
+          resultDownload.setAttribute("aria-disabled", "false");
+
           resultWrap.hidden = false;
           resultAlert.hidden = true;
-          // Fetch oEmbed to show thumbnail after success
-          try{ await fetchOEmbed(videoLink); }catch(_){ /* ignore */ }
+
+          // Fetch oEmbed for preview
+          try{ await fetchOEmbed(videoLink); }catch(_){}
           if(previewWrap){ previewWrap.hidden = false; }
           resultDownload.focus();
         } else {
+          // ❌ Hide button if no link
           resultWrap.hidden = true;
-          resultAlert.textContent = (data && data.message) ? data.message : 'Conversion failed.';
+          resultDownload.hidden = true;
+          resultDownload.removeAttribute("href");
+          resultDownload.setAttribute("aria-disabled", "true");
+
+          if(alertMessage)
+            alertMessage.textContent = (data && data.message) ? data.message : '❌ Conversion failed. Try another video.';
           resultAlert.hidden = false;
         }
       }catch(err){
         completeProgress();
         convertBtn.disabled = false;
         resultWrap.hidden = true;
-        resultAlert.textContent = 'Server error. Please try again later.';
+        resultDownload.hidden = true;
+        resultDownload.removeAttribute("href");
+        resultDownload.setAttribute("aria-disabled", "true");
+        if(alertMessage) alertMessage.textContent = '❌ Server error. Please try again later.';
         resultAlert.hidden = false;
       }
     });
@@ -129,7 +151,6 @@
     }catch(_){/* ignore */}
   }
 
-  // Smooth scroll for in-page links
   document.querySelectorAll('a[href^="#"]').forEach(a=>{
     a.addEventListener('click', (e)=>{
       const id = a.getAttribute('href');
@@ -141,7 +162,6 @@
     });
   });
 
-  // Footer year
   const yearEl = document.getElementById('year');
   if(yearEl){ yearEl.textContent = String(new Date().getFullYear()); }
 })();
