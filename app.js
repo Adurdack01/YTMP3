@@ -7,12 +7,17 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-//force to run https
-
+// Force HTTPS and primary domain
 app.use((req, res, next) => {
-  if (req.headers['x-forwarded-proto'] !== 'https' && process.env.NODE_ENV === 'production') {
-    return res.redirect('https://' + req.headers.host + req.url);
+  if (req.headers["x-forwarded-proto"] !== "https") {
+    return res.redirect("https://" + req.headers.host + req.url);
   }
+
+  // Redirect acdigi.icu to yt2mp3s-converter.acdigi.icu
+  if (req.headers.host === "acdigi.icu") {
+    return res.redirect(301, "https://yt2mp3s-converter.acdigi.icu" + req.url);
+  }
+
   next();
 });
 
