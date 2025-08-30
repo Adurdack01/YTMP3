@@ -4,3 +4,4 @@ Disallow: /api/
 Allow: /
 
 Sitemap: https://yt2mp3s-converter.acdigi.icu/sitemap.xml
+Sitemap: https://yt2mp3s-converter.acdigi.icu/new-sitemap.xml

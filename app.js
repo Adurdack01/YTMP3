@@ -37,6 +37,7 @@ app.get("/sitemap.xml", async (req, res) => {
   try {
     const hostname = "https://yt2mp3s-converter.acdigi.icu";
     const sitemap = new SitemapStream({ hostname });
+  
 
     // Explicit URLs to avoid dynamic scanning errors
     const urls = [
@@ -56,6 +57,34 @@ app.get("/sitemap.xml", async (req, res) => {
   } catch (err) {
     console.error("Sitemap error:", err);
     res.status(500).send("Server error generating sitemap");
+  }
+});
+
+// --- Dynamic new sitemap ---
+app.get("/new-sitemap.xml", async (req, res) => {
+  try {
+    const hostname = "https://yt2mp3s-converter.acdigi.icu";
+    const sitemap = new SitemapStream({ hostname });
+
+    // New URLs for this sitemap
+    const newUrls = [
+      { url: "/", changefreq: "daily", priority: 1.0 },
+      { url: "/contact", changefreq: "monthly", priority: 0.8 },
+      { url: "/privacy", changefreq: "weekly", priority: 0.6 },
+      { url: "/copyright-claims", changefreq: "monthly", priority: 0.6 },
+      { url: "/terms", changefreq: "monthly", priority: 0.6 },
+      // Add more URLs here as needed
+    ];
+
+    newUrls.forEach(item => sitemap.write(item));
+    sitemap.end();
+
+    const xmlData = await streamToPromise(sitemap);
+    res.header("Content-Type", "application/xml");
+    res.send(xmlData.toString());
+  } catch (err) {
+    console.error("New sitemap error:", err);
+    res.status(500).send("Server error generating new sitemap");
   }
 });
 
