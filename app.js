@@ -75,7 +75,7 @@ app.get("/sitemap.xml", async (req, res) => {
 // Robots.txt
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain");
-  res.sendFile(path.join(__dirname, "public", "robots.txt"));
+  res.sendFile(path.join(__dirname, "robots.txt"));
 });
 
 // --- Pages with SEO data ---

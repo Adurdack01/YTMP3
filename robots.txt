@@ -1,3 +1,6 @@
 User-agent: *
+Disallow: /convert-mp3
+Disallow: /api/
 Allow: /
+
 Sitemap: https://yt2mp3s-converter.acdigi.icu/sitemap.xml
