@@ -1,0 +1,10 @@
+# Allow all search engines to crawl the main pages
+User-agent: *
+Disallow: /convert-mp3
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+Allow: /
+
+# Sitemap location
+Sitemap: https://yt2mp3s-converter.acdigi.icu/sitemap.xml
