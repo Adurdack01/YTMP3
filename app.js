@@ -106,5 +106,9 @@ app.post("/convert-mp3", async (req, res) => {
   }
 });
 
+app.get("/sitemap-nemo.xml", (req, res) => {
+  res.sendFile(path.join(__dirname, "sitemap-nemo.xml"));
+});
+
 // --- Start server ---
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
