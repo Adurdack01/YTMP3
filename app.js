@@ -1,44 +1,42 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 require("dotenv").config();
+const fetch = require("node-fetch");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- Force HTTPS and primary domain, skip sitemap routes ---
-app.use((req, res, next) => {
-  if (req.path === "/sitemap.xml" || req.path === "/sitemap-pages.xml") return next();
-  const host = req.headers.host;
-  if (req.headers["x-forwarded-proto"] !== "https") {
-    return res.redirect("https://" + host + req.url);
-  }
-  if (host === "acdigi.icu") {
-    return res.redirect(301, "https://yt2mp3s-converter.acdigi.icu" + req.url);
-  }
-  next();
-});
-
-// --- Template engine and static files ---
+// --- Middleware ---
 app.set("view engine", "ejs");
-app.use(express.static("public")); // <-- serves sitemap.xml & sitemap-pages.xml and all other static files
+app.use(express.static(path.join(__dirname, "public"))); // serves all static files automatically
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// --- Serve sitemaps as static files ---
-app.get("/sitemap.xml", (req, res) => {
-  res.type("application/xml");
-  res.sendFile(path.join(__dirname, "public", "sitemap.xml"));
-});
-
-app.get("/sitemap-pages.xml", (req, res) => {
-  res.type("application/xml");
-  res.sendFile(path.join(__dirname, "public", "sitemap-pages.xml"));
-});
-
-// --- Serve robots.txt ---
+// --- Dynamic robots.txt ---
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain");
-  res.sendFile(path.join(__dirname, "robots.txt"));
+
+  // Default rules
+  let content = `
+User-agent: *
+Disallow: /convert-mp3
+Disallow: /api/
+Allow: /
+`;
+
+  // Add all XML files in 'public' as sitemaps
+  const sitemapFolder = path.join(__dirname, "public");
+  if (fs.existsSync(sitemapFolder)) {
+    const files = fs.readdirSync(sitemapFolder);
+    files.forEach(file => {
+      if (file.endsWith(".xml")) {
+        content += `Sitemap: https://${req.headers.host}/${file}\n`;
+      }
+    });
+  }
+
+  res.send(content);
 });
 
 // --- Pages with SEO data ---
@@ -57,35 +55,58 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/contact", (req, res) => res.render("contact", {
-  seo: { title: "Contact • YT2MP3", description: "Contact YT2MP3 for questions or support." }
-}));
+app.get("/contact", (req, res) => {
+  res.render("contact", {
+    seo: {
+      title: "Contact • YT2MP3",
+      description: "Contact YT2MP3 for questions or support."
+    }
+  });
+});
 
-app.get("/copyright-claims", (req, res) => res.render("copyright-claims", {
-  seo: { title: "Copyright Claims • YT2MP3", description: "Copyright infringement claims and DMCA notice." }
-}));
+app.get("/copyright-claims", (req, res) => {
+  res.render("copyright-claims", {
+    seo: {
+      title: "Copyright Claims • YT2MP3",
+      description: "Copyright infringement claims and DMCA notice."
+    }
+  });
+});
 
-app.get("/privacy", (req, res) => res.render("privacy", {
-  seo: { title: "Privacy Policy • YT2MP3", description: "YT2MP3 privacy practices, data collection, and user rights." }
-}));
+app.get("/privacy", (req, res) => {
+  res.render("privacy", {
+    seo: {
+      title: "Privacy Policy • YT2MP3",
+      description: "YT2MP3 privacy practices, data collection, and user rights."
+    }
+  });
+});
 
-app.get("/terms", (req, res) => res.render("terms", {
-  seo: { title: "Terms of Use • YT2MP3", description: "YT2MP3 Terms of Use and legal conditions for service use." }
-}));
+app.get("/terms", (req, res) => {
+  res.render("terms", {
+    seo: {
+      title: "Terms of Use • YT2MP3",
+      description: "YT2MP3 Terms of Use and legal conditions for service use."
+    }
+  });
+});
 
 // --- Convert MP3 route ---
 app.post("/convert-mp3", async (req, res) => {
   const videoUrl = req.body.videoLink;
+
   if (!/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(videoUrl)) {
     return res.json({ success: false, message: "Please enter a valid YouTube link." });
   }
 
   const match = videoUrl.match(/(?:v=|\/)([0-9A-Za-z_-]{11}).*/);
   const videoId = match ? match[1] : null;
+
   if (!videoId) return res.json({ success: false, message: "Could not extract video ID." });
 
   try {
     const apiUrl = `https://${process.env.API_HOST}/dl?id=${videoId}&format=mp3&type=audio`;
+
     const fetchAPI = await fetch(apiUrl, {
       method: "GET",
       headers: {
@@ -93,13 +114,14 @@ app.post("/convert-mp3", async (req, res) => {
         "x-rapidapi-host": process.env.API_HOST
       }
     });
+
     const data = await fetchAPI.json();
 
     if (data.status === "ok" && data.link) {
       return res.json({
         success: true,
         song_title: data.title,
-        song_size: (data.filesize / (1024*1024)).toFixed(2) + " MB",
+        song_size: (data.filesize / (1024 * 1024)).toFixed(2) + " MB",
         song_link: data.link
       });
     } else {
