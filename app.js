@@ -134,3 +134,12 @@ function formatFileSize(bytes) {
   if (!bytes) return null;
   return (bytes / (1024 * 1024)).toFixed(2) + " MB";
 }
+
+//force to run https
+
+app.use((req, res, next) => {
+  if (req.headers['x-forwarded-proto'] !== 'https' && process.env.NODE_ENV === 'production') {
+    return res.redirect('https://' + req.headers.host + req.url);
+  }
+  next();
+});
