@@ -1,6 +1,5 @@
 const express = require("express");
 const path = require("path");
-const fs = require("fs");
 require("dotenv").config();
 const fetch = require("node-fetch");
 
@@ -12,32 +11,6 @@ app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public"))); // serves all static files automatically
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-// --- Dynamic robots.txt ---
-app.get("/robots.txt", (req, res) => {
-  res.type("text/plain");
-
-  // Default rules
-  let content = `
-User-agent: *
-Disallow: /convert-mp3
-Disallow: /api/
-Allow: /
-`;
-
-  // Add all XML files in 'public' as sitemaps
-  const sitemapFolder = path.join(__dirname, "public");
-  if (fs.existsSync(sitemapFolder)) {
-    const files = fs.readdirSync(sitemapFolder);
-    files.forEach(file => {
-      if (file.endsWith(".xml")) {
-        content += `Sitemap: https://${req.headers.host}/${file}\n`;
-      }
-    });
-  }
-
-  res.send(content);
-});
 
 // --- Pages with SEO data ---
 app.get("/", (req, res) => {
