@@ -32,50 +32,48 @@ app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// --- Sitemap ---
-function getAllRoutes(app) {
-  const routes = [];
-  app._router.stack.forEach(m => {
-    if (m.route && m.route.path && m.route.methods.get) {
-      routes.push(m.route.path);
-    } else if (m.name === "router") {
-      m.handle.stack.forEach(h => {
-        if (h.route && h.route.path && h.route.methods.get) routes.push(h.route.path);
-      });
-    }
-  });
-  return routes;
-}
-
+// --- Stable Sitemap ---
 app.get("/sitemap.xml", async (req, res) => {
   try {
     const hostname = "https://yt2mp3s-converter.acdigi.icu";
     const sitemap = new SitemapStream({ hostname });
-    getAllRoutes(app).forEach(url => {
-      if (!url.includes(":")) {
-        let priority = 0.5, changefreq = "monthly";
-        if (url === "/") { priority = 1.0; changefreq = "daily"; }
-        else if (url.includes("contact")) { priority = 0.8; changefreq = "monthly"; }
-        else if (url.includes("privacy") || url.includes("terms") || url.includes("copyright")) {
-          priority = 0.5; changefreq = "yearly";
-        }
-        sitemap.write({ url, priority, changefreq });
-      }
-    });
+
+    // Explicit URLs to avoid dynamic scanning errors
+    const urls = [
+      { url: "/", changefreq: "daily", priority: 1.0 },
+      { url: "/contact", changefreq: "monthly", priority: 0.8 },
+      { url: "/privacy", changefreq: "yearly", priority: 0.5 },
+      { url: "/terms", changefreq: "yearly", priority: 0.5 },
+      { url: "/copyright-claims", changefreq: "yearly", priority: 0.5 }
+    ];
+
+    urls.forEach(item => sitemap.write(item));
     sitemap.end();
+
     const xmlData = await streamToPromise(sitemap);
     res.header("Content-Type", "application/xml");
     res.send(xmlData.toString());
   } catch (err) {
-    console.error(err);
-    res.status(500).end();
+    console.error("Sitemap error:", err);
+    res.status(500).send("Server error generating sitemap");
   }
 });
 
-// Robots.txt
+// --- Stable Robots.txt from root directory ---
 app.get("/robots.txt", (req, res) => {
-  res.type("text/plain");
-  res.sendFile(path.join(__dirname, "robots.txt"));
+  try {
+    res.type("text/plain");
+    const robotsPath = path.join(__dirname, "robots.txt"); // root folder
+    res.sendFile(robotsPath, err => {
+      if (err) {
+        console.error("Robots.txt error:", err);
+        res.status(500).send("Server error serving robots.txt");
+      }
+    });
+  } catch (err) {
+    console.error("Unexpected error in robots.txt route:", err);
+    res.status(500).send("Server error serving robots.txt");
+  }
 });
 
 // --- Pages with SEO data ---
@@ -97,12 +95,15 @@ app.get("/", (req, res) => {
 app.get("/contact", (req, res) => res.render("contact", {
   seo: { title: "Contact • YT2MP3", description: "Contact YT2MP3 for questions or support." }
 }));
+
 app.get("/copyright-claims", (req, res) => res.render("copyright-claims", {
   seo: { title: "Copyright Claims • YT2MP3", description: "Copyright infringement claims and DMCA notice." }
 }));
+
 app.get("/privacy", (req, res) => res.render("privacy", {
   seo: { title: "Privacy Policy • YT2MP3", description: "YT2MP3 privacy practices, data collection, and user rights." }
 }));
+
 app.get("/terms", (req, res) => res.render("terms", {
   seo: { title: "Terms of Use • YT2MP3", description: "YT2MP3 Terms of Use and legal conditions for service use." }
 }));
@@ -121,7 +122,6 @@ app.post("/convert-mp3", async (req, res) => {
   }
 
   try {
-    // ✅ Added format and type params to improve API success
     const apiUrl = `https://${process.env.API_HOST}/dl?id=${videoId}&format=mp3&type=audio`;
     console.log("Fetching API:", apiUrl);
 
@@ -134,25 +134,12 @@ app.post("/convert-mp3", async (req, res) => {
     });
 
     const data = await fetchAPI.json();
-    console.log("API response:", data); // 🔎 Debug log
+    console.log("API response:", data);
 
     if (data.status === "ok" && data.link) {
-      return sendResponse(
-        res,
-        true,
-        data.title,
-        formatFileSize(data.filesize),
-        data.link
-      );
+      return sendResponse(res, true, data.title, formatFileSize(data.filesize), data.link);
     } else {
-      return sendResponse(
-        res,
-        false,
-        null,
-        null,
-        null,
-        data.msg || "❌ Conversion failed. Please try again."
-      );
+      return sendResponse(res, false, null, null, null, data.msg || "❌ Conversion failed. Please try again.");
     }
   } catch (err) {
     console.error("API error:", err);
@@ -164,15 +151,19 @@ app.post("/convert-mp3", async (req, res) => {
 function sendResponse(res, success, title, size, link, message = null) {
   res.json({ success, song_title: title, song_size: size, song_link: link, message });
 }
+
 function isValidYouTubeUrl(url) {
   return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(url);
 }
+
 function extractVideoId(url) {
   const match = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11}).*/);
   return match ? match[1] : null;
 }
+
 function formatFileSize(bytes) {
   return bytes ? (bytes / (1024*1024)).toFixed(2) + " MB" : null;
 }
 
+// --- Start Server ---
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
