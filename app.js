@@ -1,4 +1,5 @@
 const express = require("express");
+const favicon = require("serve-favicon");
 const path = require("path");
 require("dotenv").config();
 const fetch = require("node-fetch");
@@ -12,8 +13,11 @@ app.use(express.static(path.join(__dirname, "public"))); // serves all static fi
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// --- Serve favicon explicitly ---
+app.use(favicon(path.join(__dirname, "public", "favicon", "favicon.ico")));
+
 // --- IndexNow helper ---
-const INDEXNOW_KEY = "f5f2e60af5f5409a8666ee35dc347dc9"; // your key without .txt
+const INDEXNOW_KEY = "f5f2e60af5f5409a8666ee35dc347dc9"; // your key without
 const HOST = "yt2mp3s-converter.acdigi.icu";
 const KEY_LOCATION = `https://${HOST}/${INDEXNOW_KEY}.txt`;
 
