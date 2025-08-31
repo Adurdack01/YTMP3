@@ -12,6 +12,36 @@ app.use(express.static(path.join(__dirname, "public"))); // serves all static fi
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// --- IndexNow helper ---
+const INDEXNOW_KEY = "f5f2e60af5f5409a8666ee35dc347dc9"; // your key without .txt
+const HOST = "yt2mp3s-converter.acdigi.icu";
+const KEY_LOCATION = `https://${HOST}/${INDEXNOW_KEY}.txt`;
+
+async function notifyIndexNow(urls) {
+  const payload = {
+    host: HOST,
+    key: INDEXNOW_KEY,
+    keyLocation: KEY_LOCATION,
+    urlList: urls
+  };
+
+  try {
+    const response = await fetch("https://api.indexnow.org/indexnow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    console.log("IndexNow response:", await response.text());
+  } catch (err) {
+    console.error("IndexNow error:", err);
+  }
+}
+
+// --- Serve IndexNow key ---
+app.get(`/${INDEXNOW_KEY}.txt`, (req, res) => {
+  res.sendFile(path.join(__dirname, `${INDEXNOW_KEY}.txt`));
+});
+
 // --- Pages with SEO data ---
 app.get("/", (req, res) => {
   res.render("index", {
@@ -91,12 +121,27 @@ app.post("/convert-mp3", async (req, res) => {
     const data = await fetchAPI.json();
 
     if (data.status === "ok" && data.link) {
-      return res.json({
+      const responseData = {
         success: true,
         song_title: data.title,
         song_size: (data.filesize / (1024 * 1024)).toFixed(2) + " MB",
         song_link: data.link
-      });
+      };
+
+      res.json(responseData);
+
+      // Notify IndexNow that homepage and sitemaps updated
+      notifyIndexNow([
+        `https://${HOST}/`,
+        `https://${HOST}/contact`,
+        `https://${HOST}/copyright-claims`,
+        `https://${HOST}/privacy`,
+        `https://${HOST}/terms`,
+        `https://${HOST}/sitemap.xml`,
+        `https://${HOST}/sitemap-nemo.xml`,
+        `https://${HOST}/new-sitemap.xml`
+      ]);
+
     } else {
       return res.json({ success: false, message: data.msg || "Conversion failed. Please try again." });
     }
@@ -106,6 +151,7 @@ app.post("/convert-mp3", async (req, res) => {
   }
 });
 
+// --- Serve sitemap-nemo ---
 app.get("/sitemap-nemo.xml", (req, res) => {
   res.sendFile(path.join(__dirname, "sitemap-nemo.xml"));
 });
